@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-04-28 18:47:52 +0200
+# Last modified: 2017-04-28 19:25:06 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -21,6 +21,9 @@ with open(os.environ['HOME']+os.sep+'recepten.json') as rf:
     recepies = json.load(rf)
     keys = sorted(list(recepies.keys()))
 
+current_recipe = ()
+
+
 # Create and lay out the widgets
 root = tk.Tk()
 root.wm_title('Resin calculator')
@@ -31,7 +34,10 @@ ttk.Label(root, text="Quantity:").grid(row=1, column=0, sticky='w')
 qedit = ttk.Entry(root, justify='right')
 qedit.insert(0, '100')
 qedit.grid(row=1, column=1, sticky='ew')
-ttk.Label(root, text='g').grid(row=1, column=2, sticky='w')
+units = ttk.Combobox(root, values=('g', 'kg', 'lb'), state='readonly')
+units.current(0)
+units.grid(row=1, column=2, sticky='w')
+# ttk.Label(root, text='g').grid(row=1, column=2, sticky='w')
 result = ttk.Treeview(root, columns=('component', 'quantity', 'unit'))
 result.heading('component', text='Component', anchor='w')
 result.heading('quantity', text='Quantity', anchor='e')
@@ -65,15 +71,23 @@ def is_number(data):
 def do_update(event):
     w = event.widget
     resin = choose.get()
+    u = units.get()
     quantity = float(qedit.get())
     if not resin:
         return
     components = recepies[resin]
     factor = quantity/sum(c for _, c in components)
+    current_recipe = tuple((name, c*factor)
+                           for name, c in components)
     for item in w.get_children():
         w.delete(item)
-    for name, c in components:
-        w.insert("", 'end', values=(name, '{:.1f}'.format(c*factor), 'g'))
+    for name, amount in current_recipe:
+        precision = 1
+        if amount >= 100:
+            precision = 0
+        elif amount < 1:
+            precision = 3
+        w.insert("", 'end', values=(name, '{:.{}f}'.format(amount, precision), u))
 
 
 # Connect the callbacks
@@ -81,6 +95,7 @@ vcmd = root.register(is_number)
 qedit['validate'] = 'key'
 qedit['validatecommand'] = (vcmd, '%P')
 choose.bind("<<ComboboxSelected>>", on_combo)
+units.bind("<<ComboboxSelected>>", on_combo)
 result.bind('<<UpdateNeeded>>', do_update)
 
 # Run the event loop.
