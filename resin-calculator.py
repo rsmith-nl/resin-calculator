@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-04-28 19:46:23 +0200
+# Last modified: 2017-04-28 20:03:24 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -21,8 +21,8 @@ with open(os.environ['HOME']+os.sep+'recepten.json') as rf:
     recepies = json.load(rf)
     keys = sorted(list(recepies.keys()))
 
+# The currently selected recipe.
 current_recipe = ()
-
 
 # Create and lay out the widgets
 root = tk.Tk()
@@ -37,7 +37,6 @@ qedit.grid(row=1, column=1, sticky='ew')
 units = ttk.Combobox(root, values=('g', 'kg', 'lb'), state='readonly')
 units.current(0)
 units.grid(row=1, column=2, sticky='w')
-# ttk.Label(root, text='g').grid(row=1, column=2, sticky='w')
 result = ttk.Treeview(root, columns=('component', 'quantity', 'unit'))
 result.heading('component', text='Component', anchor='w')
 result.heading('quantity', text='Quantity', anchor='e')
