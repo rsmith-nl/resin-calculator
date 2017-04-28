@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-04-28 19:25:06 +0200
+# Last modified: 2017-04-28 19:46:23 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -41,10 +41,11 @@ units.grid(row=1, column=2, sticky='w')
 result = ttk.Treeview(root, columns=('component', 'quantity', 'unit'))
 result.heading('component', text='Component', anchor='w')
 result.heading('quantity', text='Quantity', anchor='e')
-result.column('#0', width='0')
+result.heading('unit', text='Unit', anchor='w')
+result.column('#0', width='0', stretch=False)
 result.column('component', anchor='w')
-result.column('quantity', anchor='e')
-result.column('unit', width='1')
+result.column('quantity', anchor='e', stretch=False, width=100)
+result.column('unit', anchor='w', stretch=False, width=40)
 result.grid(row=2, column=0, columnspan=3, sticky='ew')
 exit = ttk.Button(root, text="Exit", command=root.quit).grid(row=3, column=2)
 
