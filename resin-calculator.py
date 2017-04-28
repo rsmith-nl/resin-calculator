@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-04-28 20:03:24 +0200
+# Last modified: 2017-04-28 21:50:29 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -46,7 +46,9 @@ result.column('component', anchor='w')
 result.column('quantity', anchor='e', stretch=False, width=100)
 result.column('unit', anchor='w', stretch=False, width=40)
 result.grid(row=2, column=0, columnspan=3, sticky='ew')
-exit = ttk.Button(root, text="Exit", command=root.quit).grid(row=3, column=2)
+ttk.Button(root, text="Exit", command=root.quit).grid(row=3, column=2)
+prbut = ttk.Button(root, text="Print")
+prbut.grid(row=3, column=0)
 
 
 # Callbacks
@@ -68,7 +70,17 @@ def is_number(data):
     return True
 
 
+def pround(val):
+    precision = 1
+    if val >= 100:
+        precision = 0
+    if val < 1:
+        precision = 3
+    return '{:.{}f}'.format(val, precision)
+
+
 def do_update(event):
+    global current_recipe
     w = event.widget
     resin = choose.get()
     u = units.get()
@@ -77,17 +89,20 @@ def do_update(event):
         return
     components = recepies[resin]
     factor = quantity/sum(c for _, c in components)
-    current_recipe = tuple((name, c*factor)
+    current_recipe = tuple((name, pround(c*factor))
                            for name, c in components)
     for item in w.get_children():
         w.delete(item)
     for name, amount in current_recipe:
-        precision = 1
-        if amount >= 100:
-            precision = 0
-        elif amount < 1:
-            precision = 3
-        w.insert("", 'end', values=(name, '{:.{}f}'.format(amount, precision), u))
+        w.insert("", 'end', values=(name, amount, u))
+
+
+def do_print():
+    u = units.get()
+    s = '{:20s}: {:>7} {}'
+    for name, amount in current_recipe:
+        print(s.format(name, amount, u))
+    print()
 
 
 # Connect the callbacks
@@ -97,6 +112,8 @@ qedit['validatecommand'] = (vcmd, '%P')
 choose.bind("<<ComboboxSelected>>", on_combo)
 units.bind("<<ComboboxSelected>>", on_combo)
 result.bind('<<UpdateNeeded>>', do_update)
+prbut['command'] = do_print
+
 
 # Run the event loop.
 root.mainloop()
