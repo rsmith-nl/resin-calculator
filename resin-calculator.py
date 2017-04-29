@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-04-28 21:50:29 +0200
+# Last modified: 2017-04-29 17:15:52 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -17,7 +17,7 @@ import os
 import tkinter as tk
 from tkinter import ttk
 
-with open(os.environ['HOME']+os.sep+'recepten.json') as rf:
+with open(os.environ['HOME']+os.sep+'resins.json') as rf:
     recepies = json.load(rf)
     keys = sorted(list(recepies.keys()))
 
