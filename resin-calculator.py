@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-04-29 17:15:52 +0200
+# Last modified: 2017-05-02 21:01:09 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -14,19 +14,27 @@
 
 import json
 import os
+import subprocess
+import tempfile
 import tkinter as tk
 from tkinter import ttk
+from datetime import datetime
+
+
+__version__ = '0.2'
+
 
 with open(os.environ['HOME']+os.sep+'resins.json') as rf:
     recepies = json.load(rf)
     keys = sorted(list(recepies.keys()))
 
 # The currently selected recipe.
-current_recipe = ()
+current_recipe = None
+current_name = None
 
 # Create and lay out the widgets
 root = tk.Tk()
-root.wm_title('Resin calculator')
+root.wm_title('Resin calculator v'+__version__)
 ttk.Label(root, text="Resin:").grid(row=0, column=0, sticky='w')
 choose = ttk.Combobox(root, values=keys, state='readonly')
 choose.grid(row=0, column=1, columnspan=2, sticky='ew')
@@ -51,9 +59,21 @@ prbut = ttk.Button(root, text="Print")
 prbut.grid(row=3, column=0)
 
 
+def pround(val):
+    """Round a number with a precision determined by the magnitude."""
+    precision = 1
+    if val >= 100:
+        precision = 0
+    if val < 1:
+        precision = 3
+    return '{:.{}f}'.format(val, precision)
+
+
 # Callbacks
 def on_combo(event):
+    global current_name
     val = choose.get()
+    current_name = val
     text2 = qedit.get()
     if val and text2:
         result.event_generate('<<UpdateNeeded>>', when='tail')
@@ -68,15 +88,6 @@ def is_number(data):
         return False
     result.event_generate('<<UpdateNeeded>>', when='tail')
     return True
-
-
-def pround(val):
-    precision = 1
-    if val >= 100:
-        precision = 0
-    if val < 1:
-        precision = 3
-    return '{:.{}f}'.format(val, precision)
 
 
 def do_update(event):
@@ -99,10 +110,23 @@ def do_update(event):
 
 def do_print():
     u = units.get()
-    s = '{:20s}: {:>7} {}'
-    for name, amount in current_recipe:
-        print(s.format(name, amount, u))
-    print()
+    s = '{:{}s}: {:>{}} {}'
+    namelen = max(len(nm) for nm, amnt in current_recipe)
+    amlen = max(len(amnt) for nm, amnt in current_recipe)
+    lines = ['Resin calculator v'+__version__, '---------------------',
+             '', 'Recipe for: '+current_name,
+             'Date: '+str(datetime.now())[:-7],
+             'User: '+os.environ['USER'], '']
+    lines += [s.format(name, namelen, amount, amlen, u) for
+              name, amount in current_recipe]
+    _, filename = tempfile.mkstemp(".txt")
+    with open(filename, 'w') as printfile:
+        printfile.write('\n'.join(lines))
+    if os.name == 'nt':
+        import win32api
+        win32api.ShellExecute(0, 'print', filename, None, '.', 0)
+    elif os.name == 'posix':
+        subprocess.run(['lpr', filename])
 
 
 # Connect the callbacks
