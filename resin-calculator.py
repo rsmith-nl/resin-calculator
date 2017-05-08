@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-05-02 21:01:09 +0200
+# Last modified: 2017-05-08 11:55:04 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -15,13 +15,12 @@
 import json
 import os
 import subprocess
-import tempfile
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
 
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 
 with open(os.environ['HOME']+os.sep+'resins.json') as rf:
@@ -113,18 +112,26 @@ def do_print():
     s = '{:{}s}: {:>{}} {}'
     namelen = max(len(nm) for nm, amnt in current_recipe)
     amlen = max(len(amnt) for nm, amnt in current_recipe)
+    if os.name == 'nt':
+        uname = os.environ['USERNAME']
+    elif os.name == 'posix':
+        uname = os.environ['USER']
+    else:
+        uname = 'unknown'
     lines = ['Resin calculator v'+__version__, '---------------------',
              '', 'Recipe for: '+current_name,
              'Date: '+str(datetime.now())[:-7],
-             'User: '+os.environ['USER'], '']
+             'User '+uname, '']
     lines += [s.format(name, namelen, amount, amlen, u) for
               name, amount in current_recipe]
-    _, filename = tempfile.mkstemp(".txt")
+    filename = 'resin-calculator-output.txt'
     with open(filename, 'w') as printfile:
         printfile.write('\n'.join(lines))
     if os.name == 'nt':
-        import win32api
-        win32api.ShellExecute(0, 'print', filename, None, '.', 0)
+        from win32api import ShellExecute
+        from win32print import GetDefaultPrinter
+        dp = GetDefaultPrinter()
+        ShellExecute(0, 'print', filename, '/d: "{}"'.format(dp), '.', 0)
     elif os.name == 'posix':
         subprocess.run(['lpr', filename])
 
