@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-05-10 09:43:20 +0200
+# Last modified: 2017-05-10 20:39:29 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -16,10 +16,11 @@ import json
 import os
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from datetime import datetime
 
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 # Platform specific set-up
 if os.name == 'nt':
@@ -29,19 +30,26 @@ if os.name == 'nt':
 
     def printfile(fn):
         dp = GetDefaultPrinter()
-        ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
+        rv = ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
+        if 0 < rv <= 32:
+            messagebox.showerror('Printing failed',
+                                 'Error code: {}'.format(rv))
 
 elif os.name == 'posix':
     from subprocess import run
     uname = os.environ['USER']
 
     def printfile(fn):
-        run(['lpr', fn])
+        cp = run(['lpr', fn])
+        if cp.returncode != 0:
+            messagebox.showerror('Printing failed',
+                                 'Error code: {}'.format(cp.returncode))
 
 else:
     uname = 'unknown'
 
     def printfile(fn):
+        messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
         pass
 
 
