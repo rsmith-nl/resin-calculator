@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-05-17 00:05:27 +0200
+# Last modified: 2017-05-17 00:25:37 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -20,7 +20,7 @@ from tkinter import messagebox
 from datetime import datetime
 
 
-__version__ = '0.6'
+__version__ = '0.7'
 
 # Platform specific set-up
 if os.name == 'nt':
@@ -73,14 +73,16 @@ qedit = ttk.Entry(root, justify='right')
 qedit.insert(0, '100')
 qedit.grid(row=1, column=1, sticky='ew')
 ttk.Label(root, text='g').grid(row=1, column=2, sticky='w')
-result = ttk.Treeview(root, columns=('component', 'quantity', 'unit'))
+result = ttk.Treeview(root, columns=('component', 'quantity', 'unit', 'ape'))
 result.heading('component', text='Component', anchor='w')
 result.heading('quantity', text='Quantity', anchor='e')
 result.heading('unit', text='Unit', anchor='w')
+result.heading('ape', text='1/kg', anchor='e')
 result.column('#0', width='0', stretch=False)
 result.column('component', anchor='w')
 result.column('quantity', anchor='e', stretch=False, width=100)
 result.column('unit', anchor='w', stretch=False, width=40)
+result.column('ape', anchor='e', stretch=False, width=60)
 result.grid(row=2, column=0, columnspan=3, sticky='ew')
 ttk.Button(root, text="Exit", command=root.quit).grid(row=3, column=2)
 prbut = ttk.Button(root, text="Print")
@@ -111,7 +113,9 @@ def is_number(data):
     if data == '':
         return True
     try:
-        float(data)
+        rv = float(data)
+        if rv == 0:
+            return False
     except ValueError:
         return False
     result.event_generate('<<UpdateNeeded>>', when='tail')
@@ -127,12 +131,13 @@ def do_update(event):
         return
     components = recepies[resin]
     factor = quantity/sum(c for _, c in components)
-    current_recipe = tuple((name, pround(c*factor))
+    current_recipe = tuple((name, pround(c*factor),
+                            '{:.2f}'.format(int(100000/(c*factor))/100))
                            for name, c in components)
     for item in w.get_children():
         w.delete(item)
-    for name, amount in current_recipe:
-        w.insert("", 'end', values=(name, amount, 'g'))
+    for name, amount, ape in current_recipe:
+        w.insert("", 'end', values=(name, amount, 'g', ape))
 
 
 def do_print():
