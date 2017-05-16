@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-05-10 20:39:29 +0200
+# Last modified: 2017-05-17 00:05:27 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -20,7 +20,7 @@ from tkinter import messagebox
 from datetime import datetime
 
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 # Platform specific set-up
 if os.name == 'nt':
@@ -72,9 +72,7 @@ ttk.Label(root, text="Quantity:").grid(row=1, column=0, sticky='w')
 qedit = ttk.Entry(root, justify='right')
 qedit.insert(0, '100')
 qedit.grid(row=1, column=1, sticky='ew')
-units = ttk.Combobox(root, values=('g', 'kg', 'lb'), state='readonly')
-units.current(0)
-units.grid(row=1, column=2, sticky='w')
+ttk.Label(root, text='g').grid(row=1, column=2, sticky='w')
 result = ttk.Treeview(root, columns=('component', 'quantity', 'unit'))
 result.heading('component', text='Component', anchor='w')
 result.heading('quantity', text='Quantity', anchor='e')
@@ -124,7 +122,6 @@ def do_update(event):
     global current_recipe
     w = event.widget
     resin = choose.get()
-    u = units.get()
     quantity = float(qedit.get())
     if not resin:
         return
@@ -135,11 +132,10 @@ def do_update(event):
     for item in w.get_children():
         w.delete(item)
     for name, amount in current_recipe:
-        w.insert("", 'end', values=(name, amount, u))
+        w.insert("", 'end', values=(name, amount, 'g'))
 
 
 def do_print():
-    u = units.get()
     s = '{:{}s}: {:>{}} {}'
     namelen = max(len(nm) for nm, amnt in current_recipe)
     amlen = max(len(amnt) for nm, amnt in current_recipe)
@@ -147,7 +143,7 @@ def do_print():
              '', 'Recipe for: '+current_name,
              'Date: '+str(datetime.now())[:-7],
              'User: '+uname, '']
-    lines += [s.format(name, namelen, amount, amlen, u) for
+    lines += [s.format(name, namelen, amount, amlen, 'g') for
               name, amount in current_recipe]
     filename = 'resin-calculator-output.txt'
     with open(filename, 'w') as pf:
@@ -160,7 +156,6 @@ vcmd = root.register(is_number)
 qedit['validate'] = 'key'
 qedit['validatecommand'] = (vcmd, '%P')
 choose.bind("<<ComboboxSelected>>", on_combo)
-units.bind("<<ComboboxSelected>>", on_combo)
 result.bind('<<UpdateNeeded>>', do_update)
 prbut['command'] = do_print
 
