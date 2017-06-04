@@ -9,7 +9,6 @@
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
 # from the Netherlands. See http://creativecommons.org/publicdomain/zero/1.0/
-
 """GUI for calculating resin amounts."""
 
 import json
@@ -18,7 +17,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from datetime import datetime
-
 
 __version__ = '0.7'
 
@@ -52,12 +50,13 @@ else:
 
     def printfile(fn):
         """Report that printing is not supported."""
-        messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
+        messagebox.showinfo('Printing',
+                            'Printing is not supported on this OS.')
         pass
 
 
 # Read the data-file
-with open(os.environ['HOME']+os.sep+'resins.json') as rf:
+with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
     recepies = json.load(rf)
     keys = sorted(list(recepies.keys()))
 
@@ -67,7 +66,7 @@ current_name = None
 
 # Create and lay out the widgets
 root = tk.Tk()
-root.wm_title('Resin calculator v'+__version__)
+root.wm_title('Resin calculator v' + __version__)
 ttk.Label(root, text="Resin:").grid(row=0, column=0, sticky='w')
 choose = ttk.Combobox(root, values=keys, state='readonly')
 choose.grid(row=0, column=1, columnspan=2, sticky='ew')
@@ -142,10 +141,9 @@ def do_update(event):
     if not resin:
         return
     components = recepies[resin]
-    factor = quantity/sum(c for _, c in components)
-    current_recipe = tuple((name, pround(c*factor),
-                            '{:.2f}'.format(int(100000/(c*factor))/100))
-                           for name, c in components)
+    factor = quantity / sum(c for _, c in components)
+    current_recipe = tuple((name, pround(c * factor), '{:.2f}'.format(
+        int(100000 / (c * factor)) / 100)) for name, c in components)
     for item in w.get_children():
         w.delete(item)
     for name, amount, ape in current_recipe:
@@ -157,12 +155,15 @@ def do_print():
     s = '{:{}s}: {:>{}} {}'
     namelen = max(len(nm) for nm, amnt in current_recipe)
     amlen = max(len(amnt) for nm, amnt in current_recipe)
-    lines = ['Resin calculator v'+__version__, '---------------------',
-             '', 'Recipe for: '+current_name,
-             'Date: '+str(datetime.now())[:-7],
-             'User: '+uname, '']
-    lines += [s.format(name, namelen, amount, amlen, 'g') for
-              name, amount in current_recipe]
+    lines = [
+        'Resin calculator v' + __version__, '---------------------', '',
+        'Recipe for: ' + current_name, 'Date: ' + str(datetime.now())[:-7],
+        'User: ' + uname, ''
+    ]
+    lines += [
+        s.format(name, namelen, amount, amlen, 'g')
+        for name, amount in current_recipe
+    ]
     filename = 'resin-calculator-output.txt'
     with open(filename, 'w') as pf:
         pf.write('\n'.join(lines))
@@ -176,7 +177,6 @@ qedit['validatecommand'] = (vcmd, '%P')
 choose.bind("<<ComboboxSelected>>", on_combo)
 result.bind('<<UpdateNeeded>>', do_update)
 prbut['command'] = do_print
-
 
 # Run the event loop.
 root.mainloop()
