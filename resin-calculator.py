@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-05-17 00:25:37 +0200
+# Last modified: 2017-06-04 15:48:36 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -29,6 +29,7 @@ if os.name == 'nt':
     uname = os.environ['USERNAME']
 
     def printfile(fn):
+        """Print the given file using the default printer."""
         dp = GetDefaultPrinter()
         rv = ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
         if 0 < rv <= 32:
@@ -40,6 +41,7 @@ elif os.name == 'posix':
     uname = os.environ['USER']
 
     def printfile(fn):
+        """Print the given file using “lpr”."""
         cp = run(['lpr', fn])
         if cp.returncode != 0:
             messagebox.showerror('Printing failed',
@@ -49,6 +51,7 @@ else:
     uname = 'unknown'
 
     def printfile(fn):
+        """Report that printing is not supported."""
         messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
         pass
 
@@ -101,6 +104,7 @@ def pround(val):
 
 # Callbacks
 def on_combo(event):
+    """Send update request when resin choice has changed."""
     global current_name
     val = choose.get()
     current_name = val
@@ -110,6 +114,7 @@ def on_combo(event):
 
 
 def is_number(data):
+    """Validate the contents of an entry widget as a float."""
     if data == '':
         return True
     try:
@@ -123,6 +128,13 @@ def is_number(data):
 
 
 def do_update(event):
+    """
+    Update callback.
+
+    This callback is coupled to the synthetic <<UpdateNeeded>> event
+    for the result widget. It updates the contents of that widget based on the
+    contents of the entry and combobox widgets.
+    """
     global current_recipe
     w = event.widget
     resin = choose.get()
@@ -141,6 +153,7 @@ def do_update(event):
 
 
 def do_print():
+    """Send ouput to a file, and print it."""
     s = '{:{}s}: {:>{}} {}'
     namelen = max(len(nm) for nm, amnt in current_recipe)
     amlen = max(len(amnt) for nm, amnt in current_recipe)
