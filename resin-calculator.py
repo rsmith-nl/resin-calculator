@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-06-09 12:31:26 +0200
+# Last modified: 2017-06-09 23:33:21 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -19,7 +19,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from datetime import datetime
 
-__version__ = '0.9'
+__version__ = '0.10'
 
 
 def pround(val):
@@ -84,18 +84,18 @@ class ResinCalcUI(tk.Tk):
         result.grid(row=2, column=0, columnspan=3, sticky='ew')
         result.bind('<<UpdateNeeded>>', self.do_update)
         self.result = result
-        prbut = ttk.Button(self, text="Print")
+        prbut = ttk.Button(self, text="Print", command=self.do_print)
         prbut.grid(row=3, column=0)
-        prbut['command'] = self.do_print
         self.choose.focus_set()
 
     def is_number(self, data):
         """Validate the contents of an entry widget as a float."""
         if data == '':
+            self.result.event_generate('<<UpdateNeeded>>', when='tail')
             return True
         try:
             rv = float(data)
-            if rv == 0:
+            if rv < 0:
                 return False
         except ValueError:
             return False
@@ -130,23 +130,31 @@ class ResinCalcUI(tk.Tk):
         on the contents of the entry and combobox widgets.
         """
         resin = self.choose.get()
-        quantity = float(self.qedit.get())
+        value = self.qedit.get()
+        if not value:
+            quantity = 0
+        else:
+            quantity = float(value)
         if not resin:
             return
+        self.current_name = resin
         components = self.recepies[resin]
         factor = quantity / sum(c for _, c in components)
-        self.current_recipe = tuple((name, pround(c * factor), '{:.2f}'.format(
-            int(100000 / (c * factor)) / 100)) for name, c in components)
         for item in self.result.get_children():
             self.result.delete(item)
+        if quantity > 0:
+            self.current_recipe = tuple((name, pround(c * factor), '{:.2f}'.format(
+                int(100000 / (c * factor)) / 100)) for name, c in components)
+        else:
+            self.current_recipe = tuple((name, 0, 0) for name, c in components)
         for name, amount, ape in self.current_recipe:
             self.result.insert("", 'end', values=(name, amount, 'g', ape))
 
-    def do_print(self, event):
+    def do_print(self):
         """Send ouput to a file, and print it."""
         s = '{:{}s}: {:>{}} {}'
-        namelen = max(len(nm) for nm, amnt in self.current_recipe)
-        amlen = max(len(amnt) for nm, amnt in self.current_recipe)
+        namelen = max(len(nm) for nm, amnt, _ in self.current_recipe)
+        amlen = max(len(amnt) for nm, amnt, _ in self.current_recipe)
         lines = [
             'Resin calculator v' + __version__, '---------------------', '',
             'Recipe for: ' + self.current_name,
@@ -154,7 +162,7 @@ class ResinCalcUI(tk.Tk):
         ]
         lines += [
             s.format(name, namelen, amount, amlen, 'g')
-            for name, amount in self.current_recipe
+            for name, amount, _ in self.current_recipe
         ]
         filename = 'resin-calculator-output.txt'
         with open(filename, 'w') as pf:
