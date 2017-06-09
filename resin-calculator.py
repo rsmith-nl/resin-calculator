@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-06-05 14:28:05 +0200
+# Last modified: 2017-06-09 12:31:26 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -15,10 +15,11 @@ import json
 import os
 import tkinter as tk
 from tkinter import ttk
+from tkinter.font import nametofont
 from tkinter import messagebox
 from datetime import datetime
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 
 def pround(val):
@@ -47,6 +48,12 @@ class ResinCalcUI(tk.Tk):
         with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
             self.recepies = json.load(rf)
             keys = sorted(list(self.recepies.keys()))
+        # Set the font.
+        default_font = nametofont("TkDefaultFont")
+        default_font.configure(size=12)
+        # General commands and bindings
+        self.bind_all('q', self.do_exit)
+        # Create widgets.
         ttk.Label(self, text="Resin:").grid(row=0, column=0, sticky='w')
         choose = ttk.Combobox(self, values=keys, state='readonly')
         choose.grid(row=0, column=1, columnspan=2, sticky='ew')
@@ -77,9 +84,6 @@ class ResinCalcUI(tk.Tk):
         result.grid(row=2, column=0, columnspan=3, sticky='ew')
         result.bind('<<UpdateNeeded>>', self.do_update)
         self.result = result
-        exit = ttk.Button(self, text="Exit", command=self.quit)
-        exit.grid(row=3, column=2)
-        exit.bind('<Return>', self.do_exit)
         prbut = ttk.Button(self, text="Print")
         prbut.grid(row=3, column=0)
         prbut['command'] = self.do_print
@@ -100,7 +104,11 @@ class ResinCalcUI(tk.Tk):
 
     # Callbacks
     def do_exit(self, event):
-        """Wrap quit in an event handler."""
+        """
+        Callback to handle quitting.
+
+        This is necessary since the quit method does not take arguments.
+        """
         self.quit()
 
     def on_combo(self, event):
