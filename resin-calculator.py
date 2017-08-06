@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-06-09 23:33:21 +0200
+# Last modified: 2017-08-06 19:49:49 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -19,7 +19,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from datetime import datetime
 
-__version__ = '0.10'
+__version__ = '0.11'
 
 
 def pround(val):
@@ -41,6 +41,7 @@ class ResinCalcUI(tk.Tk):
         self.parent = parent
         self.current_recipe = None
         self.current_name = None
+        self.quantity = 'Total'
         self.initialize()
 
     def initialize(self):
@@ -54,20 +55,27 @@ class ResinCalcUI(tk.Tk):
         # General commands and bindings
         self.bind_all('q', self.do_exit)
         # Create widgets.
-        ttk.Label(self, text="Resin:").grid(row=0, column=0, sticky='w')
-        choose = ttk.Combobox(self, values=keys, state='readonly')
-        choose.grid(row=0, column=1, columnspan=2, sticky='ew')
-        choose.bind("<<ComboboxSelected>>", self.on_combo)
-        self.choose = choose
-        ttk.Label(self, text="Quantity:").grid(row=1, column=0, sticky='w')
+        ttk.Label(self, text="Resin recipe:").grid(
+            row=0, column=0, columnspan=2, sticky='e')
+        resinchoice = ttk.Combobox(self, values=keys, state='readonly')
+        resinchoice.grid(row=0, column=2, columnspan=2, sticky='ew')
+        resinchoice.bind("<<ComboboxSelected>>", self.on_resintype)
+        self.resinchoice = resinchoice
+        quantitytype = ttk.Combobox(
+            self, values=('Total', 'First component'), state='readonly')
+        quantitytype.current(0)
+        quantitytype.grid(row=1, column=0, sticky='w')
+        quantitytype.bind("<<ComboboxSelected>>", self.on_quantitytype)
+        self.quantitytype = quantitytype
+        ttk.Label(self, text=" quantity:").grid(row=1, column=1, sticky='w')
         qedit = ttk.Entry(self, justify='right')
         qedit.insert(0, '100')
-        qedit.grid(row=1, column=1, sticky='ew')
+        qedit.grid(row=1, column=2, sticky='ew')
         vcmd = self.register(self.is_number)
         qedit['validate'] = 'key'
         qedit['validatecommand'] = (vcmd, '%P')
         self.qedit = qedit
-        ttk.Label(self, text='g').grid(row=1, column=2, sticky='w')
+        ttk.Label(self, text='g').grid(row=1, column=3, sticky='w')
         result = ttk.Treeview(
             self,
             columns=('component', 'quantity', 'unit', 'ape'),
@@ -81,12 +89,12 @@ class ResinCalcUI(tk.Tk):
         result.column('quantity', anchor='e', stretch=False, width=100)
         result.column('unit', anchor='w', stretch=False, width=40)
         result.column('ape', anchor='e', stretch=False, width=60)
-        result.grid(row=2, column=0, columnspan=3, sticky='ew')
+        result.grid(row=2, column=0, columnspan=4, sticky='ew')
         result.bind('<<UpdateNeeded>>', self.do_update)
         self.result = result
         prbut = ttk.Button(self, text="Print", command=self.do_print)
         prbut.grid(row=3, column=0)
-        self.choose.focus_set()
+        self.resinchoice.focus_set()
 
     def is_number(self, data):
         """Validate the contents of an entry widget as a float."""
@@ -111,15 +119,21 @@ class ResinCalcUI(tk.Tk):
         """
         self.quit()
 
-    def on_combo(self, event):
+    def on_resintype(self, event):
         """Send update request when resin choice has changed."""
-        global current_name
-        val = self.choose.get()
-        current_name = val
+        val = self.resinchoice.get()
+        self.current_name = val
         text2 = self.qedit.get()
         if val and text2:
             self.result.event_generate('<<UpdateNeeded>>', when='tail')
         self.qedit.focus_set()
+
+    def on_quantitytype(self, event):
+        """Send update request when the quantity type has changed."""
+        val = self.quantitytype.get()
+        if val != self.quantity:
+            self.quantity = val
+            self.result.event_generate('<<UpdateNeeded>>', when='tail')
 
     def do_update(self, event):
         """
@@ -129,7 +143,7 @@ class ResinCalcUI(tk.Tk):
         for the result widget. It updates the contents of that widget based
         on the contents of the entry and combobox widgets.
         """
-        resin = self.choose.get()
+        resin = self.resinchoice.get()
         value = self.qedit.get()
         if not value:
             quantity = 0
@@ -139,7 +153,10 @@ class ResinCalcUI(tk.Tk):
             return
         self.current_name = resin
         components = self.recepies[resin]
-        factor = quantity / sum(c for _, c in components)
+        if self.quantity == 'Total':
+            factor = quantity / sum(c for _, c in components)
+        else:
+            factor = quantity / components[0][1]
         for item in self.result.get_children():
             self.result.delete(item)
         if quantity > 0:
