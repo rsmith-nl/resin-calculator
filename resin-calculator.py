@@ -4,20 +4,20 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-08-06 19:49:49 +0200
+# Last modified: 2017-08-07 00:37:57 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
 # from the Netherlands. See http://creativecommons.org/publicdomain/zero/1.0/
 """GUI for calculating resin amounts."""
 
-import json
+from datetime import datetime
+from json import load as load_json
 import os
 import tkinter as tk
 from tkinter import ttk
 from tkinter.font import nametofont
 from tkinter import messagebox
-from datetime import datetime
 
 __version__ = '0.11'
 
@@ -41,33 +41,36 @@ class ResinCalcUI(tk.Tk):
         self.parent = parent
         self.current_recipe = None
         self.current_name = None
-        self.quantity = 'Total'
+        self.quantity = 0
         self.initialize()
 
     def initialize(self):
         """Read the data file and create the GUI."""
         with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
-            self.recepies = json.load(rf)
+            self.recepies = load_json(rf)
             keys = sorted(list(self.recepies.keys()))
         # Set the font.
         default_font = nametofont("TkDefaultFont")
         default_font.configure(size=12)
+        self.option_add("*Font", default_font)
         # General commands and bindings
         self.bind_all('q', self.do_exit)
         # Create widgets.
-        ttk.Label(self, text="Resin recipe:").grid(
-            row=0, column=0, columnspan=2, sticky='e')
-        resinchoice = ttk.Combobox(self, values=keys, state='readonly')
+        ttk.Label(
+            self, text="Resin recipe:").grid(
+                row=0, column=0, columnspan=2, sticky='e')
+        resinchoice = ttk.Combobox(
+            self, values=keys, state='readonly', justify='right')
         resinchoice.grid(row=0, column=2, columnspan=2, sticky='ew')
         resinchoice.bind("<<ComboboxSelected>>", self.on_resintype)
         self.resinchoice = resinchoice
+        qt = ('Total quantity:', 'First component quantity:')
         quantitytype = ttk.Combobox(
-            self, values=('Total', 'First component'), state='readonly')
+            self, values=qt, state='readonly', justify='right')
         quantitytype.current(0)
-        quantitytype.grid(row=1, column=0, sticky='w')
+        quantitytype.grid(row=1, column=0, columnspan=2, sticky='w')
         quantitytype.bind("<<ComboboxSelected>>", self.on_quantitytype)
         self.quantitytype = quantitytype
-        ttk.Label(self, text=" quantity:").grid(row=1, column=1, sticky='w')
         qedit = ttk.Entry(self, justify='right')
         qedit.insert(0, '100')
         qedit.grid(row=1, column=2, sticky='ew')
@@ -130,7 +133,7 @@ class ResinCalcUI(tk.Tk):
 
     def on_quantitytype(self, event):
         """Send update request when the quantity type has changed."""
-        val = self.quantitytype.get()
+        val = self.quantitytype.current()
         if val != self.quantity:
             self.quantity = val
             self.result.event_generate('<<UpdateNeeded>>', when='tail')
@@ -153,15 +156,17 @@ class ResinCalcUI(tk.Tk):
             return
         self.current_name = resin
         components = self.recepies[resin]
-        if self.quantity == 'Total':
+        if self.quantity == 0:
             factor = quantity / sum(c for _, c in components)
         else:
             factor = quantity / components[0][1]
         for item in self.result.get_children():
             self.result.delete(item)
         if quantity > 0:
-            self.current_recipe = tuple((name, pround(c * factor), '{:.2f}'.format(
-                int(100000 / (c * factor)) / 100)) for name, c in components)
+            self.current_recipe = tuple((name, pround(c * factor),
+                                         '{:.2f}'.format(
+                                             int(100000 / (c * factor)) / 100))
+                                        for name, c in components)
         else:
             self.current_recipe = tuple((name, 0, 0) for name, c in components)
         for name, amount, ape in self.current_recipe:
