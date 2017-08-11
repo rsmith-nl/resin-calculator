@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-08-07 00:37:57 +0200
+# Last modified: 2017-08-12 00:40:11 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -19,7 +19,7 @@ from tkinter import ttk
 from tkinter.font import nametofont
 from tkinter import messagebox
 
-__version__ = '0.11'
+__version__ = '0.13'
 
 
 def pround(val):
@@ -55,18 +55,21 @@ class ResinCalcUI(tk.Tk):
         self.option_add("*Font", default_font)
         # General commands and bindings
         self.bind_all('q', self.do_exit)
+        # Make selected rows and columns resizable
+        self.columnconfigure(2, weight=1)
+        self.rowconfigure(2, weight=1)
         # Create widgets.
         ttk.Label(
-            self, text="Resin recipe:").grid(
-                row=0, column=0, columnspan=2, sticky='e')
+            self, text="Resin recipe:", anchor='e').grid(
+                row=0, column=0, columnspan=2, sticky='we')
         resinchoice = ttk.Combobox(
-            self, values=keys, state='readonly', justify='right')
+            self, values=keys, state='readonly', justify='right', width=26)
         resinchoice.grid(row=0, column=2, columnspan=2, sticky='ew')
         resinchoice.bind("<<ComboboxSelected>>", self.on_resintype)
         self.resinchoice = resinchoice
         qt = ('Total quantity:', 'First component quantity:')
         quantitytype = ttk.Combobox(
-            self, values=qt, state='readonly', justify='right')
+            self, values=qt, state='readonly', justify='right', width=22)
         quantitytype.current(0)
         quantitytype.grid(row=1, column=0, columnspan=2, sticky='w')
         quantitytype.bind("<<ComboboxSelected>>", self.on_quantitytype)
@@ -92,7 +95,7 @@ class ResinCalcUI(tk.Tk):
         result.column('quantity', anchor='e', stretch=False, width=100)
         result.column('unit', anchor='w', stretch=False, width=40)
         result.column('ape', anchor='e', stretch=False, width=60)
-        result.grid(row=2, column=0, columnspan=4, sticky='ew')
+        result.grid(row=2, column=0, columnspan=4, sticky='nesw')
         result.bind('<<UpdateNeeded>>', self.do_update)
         self.result = result
         prbut = ttk.Button(self, text="Print", command=self.do_print)
