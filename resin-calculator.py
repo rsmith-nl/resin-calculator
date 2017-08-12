@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-08-12 00:40:11 +0200
+# Last modified: 2017-08-12 12:32:31 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -94,7 +94,7 @@ class ResinCalcUI(tk.Tk):
         result.column('component', anchor='w')
         result.column('quantity', anchor='e', stretch=False, width=100)
         result.column('unit', anchor='w', stretch=False, width=40)
-        result.column('ape', anchor='e', stretch=False, width=60)
+        result.column('ape', anchor='e', stretch=False, width=80)
         result.grid(row=2, column=0, columnspan=4, sticky='nesw')
         result.bind('<<UpdateNeeded>>', self.do_update)
         self.result = result
