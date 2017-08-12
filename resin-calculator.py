@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-08-12 12:32:31 +0200
+# Last modified: 2017-08-12 16:52:59 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -12,8 +12,9 @@
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
-from json import load as load_json
+from json import loads as json_loads
 import os
+import re
 import tkinter as tk
 from tkinter import ttk
 from tkinter.font import nametofont
@@ -32,6 +33,14 @@ def pround(val):
     return '{:.{}f}'.format(val, precision)
 
 
+def load_data():
+    """Load the resin data."""
+    with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
+        text = rf.read()
+    nocomments = re.sub('^//.*$', '', text, flags=re.MULTILINE)
+    return json_loads(nocomments)
+
+
 class ResinCalcUI(tk.Tk):
     """GUI for the resin calculator."""
 
@@ -46,9 +55,8 @@ class ResinCalcUI(tk.Tk):
 
     def initialize(self):
         """Read the data file and create the GUI."""
-        with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
-            self.recepies = load_json(rf)
-            keys = sorted(list(self.recepies.keys()))
+        self.recepies = load_data()
+        keys = sorted(list(self.recepies.keys()))
         # Set the font.
         default_font = nametofont("TkDefaultFont")
         default_font.configure(size=12)
