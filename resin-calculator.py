@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-08-12 16:52:59 +0200
+# Last modified: 2017-09-08 20:58:45 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -20,7 +20,7 @@ from tkinter import ttk
 from tkinter.font import nametofont
 from tkinter import messagebox
 
-__version__ = '0.13'
+__version__ = '0.13.1'
 
 
 def pround(val):
@@ -37,8 +37,12 @@ def load_data():
     """Load the resin data."""
     with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
         text = rf.read()
+    m = re.search('// Last modified: (.*)', text)
+    lm = None
+    if m:
+        lm = m.groups()[0]
     nocomments = re.sub('^//.*$', '', text, flags=re.MULTILINE)
-    return json_loads(nocomments)
+    return json_loads(nocomments), lm
 
 
 class ResinCalcUI(tk.Tk):
@@ -55,7 +59,7 @@ class ResinCalcUI(tk.Tk):
 
     def initialize(self):
         """Read the data file and create the GUI."""
-        self.recepies = load_data()
+        self.recepies, filedate = load_data()
         keys = sorted(list(self.recepies.keys()))
         # Set the font.
         default_font = nametofont("TkDefaultFont")
@@ -106,8 +110,14 @@ class ResinCalcUI(tk.Tk):
         result.grid(row=2, column=0, columnspan=4, sticky='nesw')
         result.bind('<<UpdateNeeded>>', self.do_update)
         self.result = result
-        prbut = ttk.Button(self, text="Print", command=self.do_print)
-        prbut.grid(row=3, column=0)
+        prbut = ttk.Button(self, text="Print recipe", command=self.do_print)
+        prbut.grid(row=3, column=0, sticky='w')
+        if filedate:
+            dflabel = ttk.Label(
+                self, text='Data file modification date: ' + filedate,
+                anchor='center', foreground='#777777'
+            )
+            dflabel.grid(row=3, column=1, columnspan=2, sticky='ew')
         self.resinchoice.focus_set()
 
     def is_number(self, data):
