@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-08 20:58:45 +0200
+# Last modified: 2017-09-11 11:00:46 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -20,7 +20,7 @@ from tkinter import ttk
 from tkinter.font import nametofont
 from tkinter import messagebox
 
-__version__ = '0.13.1'
+__version__ = '0.13.2'
 
 
 def pround(val):
@@ -199,7 +199,7 @@ class ResinCalcUI(tk.Tk):
         namelen = max(len(nm) for nm, amnt, _ in self.current_recipe)
         amlen = max(len(amnt) for nm, amnt, _ in self.current_recipe)
         lines = [
-            'Resin calculator v' + __version__, '---------------------', '',
+            'Resin calculator v' + __version__, '------------------------', '',
             'Recipe for: ' + self.current_name,
             'Date: ' + str(datetime.now())[:-7], 'User: ' + uname, ''
         ]
