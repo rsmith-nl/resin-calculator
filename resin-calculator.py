@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-11 11:00:46 +0200
+# Last modified: 2017-09-12 00:34:28 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -19,8 +19,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.font import nametofont
 from tkinter import messagebox
+from tkinter import filedialog
 
-__version__ = '0.13.2'
+__version__ = '0.14.0'
 
 
 def pround(val):
@@ -112,12 +113,14 @@ class ResinCalcUI(tk.Tk):
         self.result = result
         prbut = ttk.Button(self, text="Print recipe", command=self.do_print)
         prbut.grid(row=3, column=0, sticky='w')
+        savebut = ttk.Button(self, text="Save recipe", command=self.do_saveas)
+        savebut.grid(row=3, column=1, sticky='w')
         if filedate:
             dflabel = ttk.Label(
                 self, text='Data file modification date: ' + filedate,
                 anchor='center', foreground='#777777'
             )
-            dflabel.grid(row=3, column=1, columnspan=2, sticky='ew')
+            dflabel.grid(row=4, column=1, columnspan=4, sticky='ew')
         self.resinchoice.focus_set()
 
     def is_number(self, data):
@@ -193,8 +196,8 @@ class ResinCalcUI(tk.Tk):
         for name, amount, ape in self.current_recipe:
             self.result.insert("", 'end', values=(name, amount, 'g', ape))
 
-    def do_print(self):
-        """Send ouput to a file, and print it."""
+    def make_text(self):
+        """Create text representation of recipe."""
         s = '{:{}s}: {:>{}} {}'
         namelen = max(len(nm) for nm, amnt, _ in self.current_recipe)
         amlen = max(len(amnt) for nm, amnt, _ in self.current_recipe)
@@ -207,10 +210,31 @@ class ResinCalcUI(tk.Tk):
             s.format(name, namelen, amount, amlen, 'g')
             for name, amount, _ in self.current_recipe
         ]
+        return '\n'.join(lines)
+
+    def do_print(self):
+        """Send recipe to a file, and print it."""
+        if self.current_recipe is None:
+            return
+        text = self.make_text()
         filename = 'resin-calculator-output.txt'
         with open(filename, 'w') as pf:
-            pf.write('\n'.join(lines))
+            pf.write(text)
         printfile(filename)
+
+    def do_saveas(self):
+        """Save recipe to a file."""
+        if self.current_recipe is None:
+            return
+        fn = filedialog.asksaveasfilename(
+            parent=self, defaultextension='.txt',
+            initialfile=self.current_name,
+            initialdir=os.environ['HOME'])
+        if not len(fn):
+            return
+        text = self.make_text()
+        with open(fn, 'w') as pf:
+            pf.write(text)
 
 
 # Platform specific set-up
