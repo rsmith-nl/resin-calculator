@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-12 00:34:28 +0200
+# Last modified: 2017-09-16 11:56:07 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -12,7 +12,7 @@
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
-from json import loads as json_loads
+from json import loads
 import os
 import re
 import tkinter as tk
@@ -37,13 +37,14 @@ def pround(val):
 def load_data():
     """Load the resin data."""
     with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
-        text = rf.read()
-    m = re.search('// Last modified: (.*)', text)
-    lm = None
-    if m:
-        lm = m.groups()[0]
+        lines = rf.readlines()
+    text = '\n'.join([ln.strip() for ln in lines])
+    try:
+        lm = re.search('// Last modified: (.*)', text).groups()[0]
+    except AttributeError:
+        lm = None
     nocomments = re.sub('^//.*$', '', text, flags=re.MULTILINE)
-    return json_loads(nocomments), lm
+    return loads(nocomments), lm
 
 
 class ResinCalcUI(tk.Tk):
