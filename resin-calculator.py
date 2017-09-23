@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-23 22:40:47 +0200
+# Last modified: 2017-09-23 23:15:42 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -22,7 +22,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '0.15.0'
+__version__ = '0.16.0'
 
 
 def pround(val):
@@ -164,6 +164,15 @@ class ResinCalcUI(tk.Tk):
             self.quantity = val
             self.result.event_generate('<<UpdateNeeded>>', when='tail')
 
+    def get_amount(self):
+        """Return the values of the amount entry field as a float."""
+        value = self.qedit.get()
+        if not value:
+            quantity = 0
+        else:
+            quantity = float(value)
+        return quantity
+
     def do_update(self, event):
         """
         Update callback.
@@ -173,13 +182,9 @@ class ResinCalcUI(tk.Tk):
         on the contents of the entry and combobox widgets.
         """
         resin = self.resinchoice.get()
-        value = self.qedit.get()
-        if not value:
-            quantity = 0
-        else:
-            quantity = float(value)
         if not resin:
             return
+        quantity = self.get_amount()
         self.current_name = resin
         components = self.recepies[resin]
         if self.quantity == 0:
@@ -200,18 +205,24 @@ class ResinCalcUI(tk.Tk):
 
     def make_text(self):
         """Create text representation of recipe."""
-        s = '{:{}s}: {:>{}} {}'
+        s = '{:{}s}: {:>{}} {} ({:>{}} /kg)'
+        q = self.get_amount()
         namelen = max(len(nm) for nm, amnt, _ in self.current_recipe)
-        amlen = max(len(amnt) for nm, amnt, _ in self.current_recipe)
+        amlen = max(len(amnt) for _, amnt, _ in self.current_recipe)
+        amlen = max((amlen, len(pround(q))))
+        apulen = max(len(apu) for _, _, apu in self.current_recipe)
         lines = [
             'Resin calculator v' + __version__, '------------------------', '',
             'Recipe for: ' + self.current_name,
             'Date: ' + str(datetime.now())[:-7], 'User: ' + uname, ''
         ]
         lines += [
-            s.format(name, namelen, amount, amlen, 'g')
-            for name, amount, _ in self.current_recipe
+            s.format(name, namelen, amount, amlen, 'g', apu, apulen)
+            for name, amount, apu in self.current_recipe
         ]
+        lines += [
+            '-'*(namelen + 4 + amlen),
+            '{:{}s}{:>{}} {}'.format('', namelen+2, pround(q), amlen, 'g')]
         return '\n'.join(lines)
 
     def do_print(self):
