@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-16 11:56:07 +0200
+# Last modified: 2017-09-23 22:40:47 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -13,6 +13,7 @@
 
 from datetime import datetime
 from json import loads
+from sys import exit as sys_exit
 import os
 import re
 import tkinter as tk
@@ -21,7 +22,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '0.14.0'
+__version__ = '0.15.0'
 
 
 def pround(val):
@@ -262,6 +263,11 @@ elif os.name == 'posix':
         if cp.returncode != 0:
             messagebox.showerror('Printing failed',
                                  'Error code: {}'.format(cp.returncode))
+
+    # Detach from terminal.
+    if os.fork():
+        sys_exit()
+
 
 else:
     uname = 'unknown'
