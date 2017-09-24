@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-24 12:26:25 +0200
+# Last modified: 2017-09-24 12:31:55 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -280,7 +280,6 @@ elif os.name == 'posix':
     if os.fork():
         sys_exit()
 
-
 else:
     uname = 'unknown'
 
@@ -288,7 +287,6 @@ else:
         """Report that printing is not supported."""
         messagebox.showinfo('Printing',
                             'Printing is not supported on this OS.')
-        pass
 
 # Create and run the GUI.
 root = ResinCalcUI(None)
