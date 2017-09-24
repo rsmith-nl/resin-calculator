@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-24 12:20:11 +0200
+# Last modified: 2017-09-24 12:26:25 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -241,6 +241,7 @@ class ResinCalcUI(tk.Tk):
             return
         fn = filedialog.asksaveasfilename(
             parent=self, defaultextension='.txt',
+            filetypes=(('text files', '*.txt'), ('all files', '*.*')),
             initialfile=self.current_name,
             initialdir=os.environ['HOME'])
         if not len(fn):
