@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-09-23 23:15:42 +0200
+# Last modified: 2017-09-24 12:20:11 +0200
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -289,7 +289,7 @@ else:
                             'Printing is not supported on this OS.')
         pass
 
-
+# Create and run the GUI.
 root = ResinCalcUI(None)
 root.wm_title('Resin calculator v' + __version__)
 root.mainloop()
