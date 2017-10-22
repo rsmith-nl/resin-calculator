@@ -1,3 +1,4 @@
 .ropeproject/
 __pycache__/
 resin-calculator-output.txt
+resins.sqlite
