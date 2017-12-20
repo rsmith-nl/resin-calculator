@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-11-11 19:56:33 +0100
+# Last modified: 2017-12-20 23:26:26 +0100
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -22,7 +22,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 
 def pround(val):
@@ -50,6 +50,8 @@ def load_data():
 
 class ResinCalcUI(tk.Tk):
     """GUI for the resin calculator."""
+
+    __slots__ = ('parent', 'current_recipe', 'current_name', 'quantity')
 
     def __init__(self, parent):
         """Create the UI object."""
