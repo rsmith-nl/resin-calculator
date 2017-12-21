@@ -1,0 +1,53 @@
+// file: resins.json
+// vim:fileencoding=utf-8:fdm=marker:ft=json
+// Example resin database for resin-calculator.py
+//
+// Author: R.F. Smith <rsmith@xs4all.nl>
+// Created: 2017-08-01 16:22:58 +0200
+// Last modified: 2017-12-21 15:39:39 +0100
+{
+    "Araldite 2011": [
+        [
+            "araldite AW 106",
+            100
+        ],
+        [
+            "harder HV 953U",
+            80
+        ]
+    ],
+    "Araldite 5052": [
+        [
+            "araldite LY 5052",
+            100
+        ],
+        [
+            "aradur 5052",
+            38
+        ]
+    ],
+    "Epikote 04908": [
+        [
+            "epikote EPR 04908",
+            100
+        ],
+        [
+            "epikure EPH 04908",
+            30
+        ]
+    ],
+    "Palatal P4-01": [
+        [
+            "palatal P4-01",
+            1000
+        ],
+        [
+            "accellerator NL49P",
+            3
+        ],
+        [
+            "butanox M50",
+            10
+        ]
+    ]
+}

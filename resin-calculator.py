@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-12-20 23:26:26 +0100
+# Last modified: 2017-12-21 15:38:03 +0100
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin.py. This work is published
@@ -37,8 +37,12 @@ def pround(val):
 
 def load_data():
     """Load the resin data."""
-    with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
-        lines = rf.readlines()
+    try:
+        with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
+            lines = rf.readlines()
+    except FileNotFoundError:
+        with open('resins.json') as rf:
+            lines = rf.readlines()
     text = '\n'.join([ln.strip() for ln in lines])
     try:
         lm = re.search('// Last modified: (.*)', text).groups()[0]
