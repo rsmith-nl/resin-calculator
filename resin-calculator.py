@@ -4,10 +4,10 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-12-21 15:38:03 +0100
+# Last modified: 2017-12-21 15:41:38 +0100
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
-# related or neighboring rights to resin.py. This work is published
+# related or neighboring rights to resin-calculator.py. This work is published
 # from the Netherlands. See http://creativecommons.org/publicdomain/zero/1.0/
 """GUI for calculating resin amounts."""
 
