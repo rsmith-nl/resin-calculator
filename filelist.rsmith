@@ -1,7 +1,0 @@
-# Last modified: 2017-12-21 15:21:06 +0100
-# List of all files that should be installed for rsmith on the following
-# machine;
-slackbox.erewhon.home rfs.erewhon.home nescio.erewhon.home
-
-# file                  perm    target
-resin-calculator.py     700     /home/rsmith/bin/resin-calculator
