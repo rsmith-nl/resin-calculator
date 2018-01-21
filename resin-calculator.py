@@ -4,7 +4,7 @@
 #
 # Author: R.F. Smith <rsmith@xs4all.nl>
 # Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2017-12-21 15:41:38 +0100
+# Last modified: 2018-01-21 12:06:58 +0100
 #
 # To the extent possible under law, R.F. Smith has waived all copyright and
 # related or neighboring rights to resin-calculator.py. This work is published
@@ -22,7 +22,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 
 def pround(val):
@@ -212,7 +212,7 @@ class ResinCalcUI(tk.Tk):
     def make_text(self):
         """Create text representation of recipe."""
         s = '{:{}s}: {:>{}} {} ({:>{}} /kg)'
-        q = self.get_amount()
+        q = sum(float(amnt) for _, amnt, _ in self.current_recipe)
         namelen = max(len(nm) for nm, amnt, _ in self.current_recipe)
         amlen = max(len(amnt) for _, amnt, _ in self.current_recipe)
         amlen = max((amlen, len(pround(q))))
