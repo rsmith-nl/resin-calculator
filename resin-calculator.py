@@ -2,13 +2,10 @@
 # file: resin-calculator.py
 # vim:fileencoding=utf-8:fdm=marker:ft=python
 #
-# Author: R.F. Smith <rsmith@xs4all.nl>
-# Created: 2017-04-28 15:04:26 +0200
-# Last modified: 2018-01-21 12:19:42 +0100
-#
-# To the extent possible under law, R.F. Smith has waived all copyright and
-# related or neighboring rights to resin-calculator.py. This work is published
-# from the Netherlands. See http://creativecommons.org/publicdomain/zero/1.0/
+# Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
+# SPDX-License-Identifier: MIT
+# Created: 2017-04-28T15:04:26+0200
+# Last modified: 2018-04-17T00:16:53+0200
 """GUI for calculating resin amounts."""
 
 from datetime import datetime

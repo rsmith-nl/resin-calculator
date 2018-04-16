@@ -3,8 +3,9 @@
 // Example resin database for resin-calculator.py
 //
 // Author: R.F. Smith <rsmith@xs4all.nl>
+// SPDX-License-Identifier: MIT
 // Created: 2017-08-01 16:22:58 +0200
-// Last modified: 2017-12-21 15:39:39 +0100
+// Last modified: 2018-04-17T00:17:53+0200
 {
     "Araldite 2011": [
         [
