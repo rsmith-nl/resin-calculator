@@ -78,16 +78,16 @@ class ResinCalcUI(tk.Tk):
         self.rowconfigure(2, weight=1)
         # Create widgets.
         ttk.Label(
-            self, text="Resin recipe:", anchor='e').grid(
-                row=0, column=0, columnspan=2, sticky='we')
-        resinchoice = ttk.Combobox(
-            self, values=keys, state='readonly', justify='right', width=26)
+            self, text="Resin recipe:", anchor='e'
+        ).grid(
+            row=0, column=0, columnspan=2, sticky='we'
+        )
+        resinchoice = ttk.Combobox(self, values=keys, state='readonly', justify='right', width=26)
         resinchoice.grid(row=0, column=2, columnspan=2, sticky='ew')
         resinchoice.bind("<<ComboboxSelected>>", self.on_resintype)
         self.resinchoice = resinchoice
         qt = ('Total quantity:', 'First component quantity:')
-        quantitytype = ttk.Combobox(
-            self, values=qt, state='readonly', justify='right', width=22)
+        quantitytype = ttk.Combobox(self, values=qt, state='readonly', justify='right', width=22)
         quantitytype.current(0)
         quantitytype.grid(row=1, column=0, columnspan=2, sticky='w')
         quantitytype.bind("<<ComboboxSelected>>", self.on_quantitytype)
@@ -101,9 +101,8 @@ class ResinCalcUI(tk.Tk):
         self.qedit = qedit
         ttk.Label(self, text='g').grid(row=1, column=3, sticky='w')
         result = ttk.Treeview(
-            self,
-            columns=('component', 'quantity', 'unit', 'ape'),
-            selectmode="none")
+            self, columns=('component', 'quantity', 'unit', 'ape'), selectmode="none"
+        )
         result.heading('component', text='Component', anchor='w')
         result.heading('quantity', text='Quantity', anchor='e')
         result.heading('unit', text='Unit', anchor='w')
@@ -122,8 +121,10 @@ class ResinCalcUI(tk.Tk):
         savebut.grid(row=3, column=1, sticky='w')
         if filedate:
             dflabel = ttk.Label(
-                self, text='Data file modification date: ' + filedate,
-                anchor='center', foreground='#777777'
+                self,
+                text='Data file modification date: ' + filedate,
+                anchor='center',
+                foreground='#777777'
             )
             dflabel.grid(row=4, column=1, columnspan=4, sticky='ew')
         self.resinchoice.focus_set()
@@ -197,10 +198,10 @@ class ResinCalcUI(tk.Tk):
         for item in self.result.get_children():
             self.result.delete(item)
         if quantity > 0:
-            self.current_recipe = tuple((name, pround(c * factor),
-                                         '{:.2f}'.format(
-                                             int(100000 / (c * factor)) / 100))
-                                        for name, c in components)
+            self.current_recipe = tuple(
+                (name, pround(c * factor), '{:.2f}'.format(int(100000 / (c * factor)) / 100))
+                for name, c in components
+            )
         else:
             self.current_recipe = tuple((name, 0, 0) for name, c in components)
         for name, amount, ape in self.current_recipe:
@@ -218,16 +219,17 @@ class ResinCalcUI(tk.Tk):
         apulen = max(len(apu) for _, _, apu in self.current_recipe)
         lines = [
             'Resin calculator v' + __version__, '------------------------', '',
-            'Recipe for: ' + self.current_name,
-            'Date: ' + str(datetime.now())[:-7], 'User: ' + uname, ''
+            'Recipe for: ' + self.current_name, 'Date: ' + str(datetime.now())[:-7],
+            'User: ' + uname, ''
         ]
         lines += [
             s.format(name, namelen, amount, amlen, 'g', apu, apulen)
             for name, amount, apu in self.current_recipe
         ]
         lines += [
-            '-'*(namelen + 4 + amlen),
-            '{:{}s}{:>{}} {}'.format('', namelen+2, pround(q), amlen, 'g')]
+            '-' * (namelen + 4 + amlen),
+            '{:{}s}{:>{}} {}'.format('', namelen + 2, pround(q), amlen, 'g')
+        ]
         return '\n'.join(lines)
 
     def do_print(self):
@@ -245,10 +247,12 @@ class ResinCalcUI(tk.Tk):
         if self.current_recipe is None:
             return
         fn = filedialog.asksaveasfilename(
-            parent=self, defaultextension='.txt',
+            parent=self,
+            defaultextension='.txt',
             filetypes=(('text files', '*.txt'), ('all files', '*.*')),
             initialfile=self.current_name,
-            initialdir=os.environ['HOME'])
+            initialdir=os.environ['HOME']
+        )
         if not len(fn):
             return
         text = self.make_text()
@@ -267,8 +271,7 @@ if os.name == 'nt':
         dp = GetDefaultPrinter()
         rv = ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
         if 0 < rv <= 32:
-            messagebox.showerror('Printing failed',
-                                 'Error code: {}'.format(rv))
+            messagebox.showerror('Printing failed', 'Error code: {}'.format(rv))
 
 elif os.name == 'posix':
     from subprocess import run
@@ -278,8 +281,7 @@ elif os.name == 'posix':
         """Print the given file using “lpr”."""
         cp = run(['lpr', fn])
         if cp.returncode != 0:
-            messagebox.showerror('Printing failed',
-                                 'Error code: {}'.format(cp.returncode))
+            messagebox.showerror('Printing failed', 'Error code: {}'.format(cp.returncode))
 
     # Detach from terminal.
     if os.fork():
@@ -290,8 +292,8 @@ else:
 
     def printfile(fn):
         """Report that printing is not supported."""
-        messagebox.showinfo('Printing',
-                            'Printing is not supported on this OS.')
+        messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
+
 
 # Create and run the GUI.
 root = ResinCalcUI(None)
