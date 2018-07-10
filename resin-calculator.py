@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2018-04-17T00:16:53+0200
+# Last modified: 2018-07-10T19:24:08+0200
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -19,7 +19,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 
 def pround(val):
@@ -101,8 +101,10 @@ class ResinCalcUI(tk.Tk):
         self.qedit = qedit
         ttk.Label(self, text='g').grid(row=1, column=3, sticky='w')
         result = ttk.Treeview(
-            self, columns=('component', 'quantity', 'unit', 'ape'), selectmode="none"
+            self, columns=('component', 'quantity', 'unit', 'ape'), selectmode="none",
         )
+        style = ttk.Style(self)
+        style.configure('Treeview', rowheight=24)
         result.heading('component', text='Component', anchor='w')
         result.heading('quantity', text='Quantity', anchor='e')
         result.heading('unit', text='Unit', anchor='w')
