@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2018-07-10T19:24:08+0200
+# Last modified: 2019-07-25T22:04:15+0200
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -149,10 +149,8 @@ class ResinCalcUI(tk.Tk):
     def do_exit(self, event):
         """
         Callback to handle quitting.
-
-        This is necessary since the quit method does not take arguments.
         """
-        self.quit()
+        self.destroy()
 
     def on_resintype(self, event):
         """Send update request when resin choice has changed."""
