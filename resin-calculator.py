@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2019-07-25T22:04:15+0200
+# Last modified: 2019-08-20T11:15:23+0200
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -260,42 +260,42 @@ class ResinCalcUI(tk.Tk):
             pf.write(text)
 
 
-# Platform specific set-up
-if os.name == 'nt':
-    from win32api import ShellExecute
-    from win32print import GetDefaultPrinter
-    uname = os.environ['USERNAME']
+if __name__ == '__main__':
+    # Platform specific set-up
+    if os.name == 'nt':
+        from win32api import ShellExecute
+        from win32print import GetDefaultPrinter
+        uname = os.environ['USERNAME']
 
-    def printfile(fn):
-        """Print the given file using the default printer."""
-        dp = GetDefaultPrinter()
-        rv = ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
-        if 0 < rv <= 32:
-            messagebox.showerror('Printing failed', 'Error code: {}'.format(rv))
+        def printfile(fn):
+            """Print the given file using the default printer."""
+            dp = GetDefaultPrinter()
+            rv = ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
+            if 0 < rv <= 32:
+                messagebox.showerror('Printing failed', 'Error code: {}'.format(rv))
 
-elif os.name == 'posix':
-    from subprocess import run
-    uname = os.environ['USER']
+    elif os.name == 'posix':
+        from subprocess import run
+        uname = os.environ['USER']
 
-    def printfile(fn):
-        """Print the given file using “lpr”."""
-        cp = run(['lpr', fn])
-        if cp.returncode != 0:
-            messagebox.showerror('Printing failed', 'Error code: {}'.format(cp.returncode))
+        def printfile(fn):
+            """Print the given file using “lpr”."""
+            cp = run(['lpr', fn])
+            if cp.returncode != 0:
+                messagebox.showerror('Printing failed', 'Error code: {}'.format(cp.returncode))
 
-    # Detach from terminal.
-    if os.fork():
-        sys_exit()
+        # Detach from terminal.
+        if os.fork():
+            sys_exit()
 
-else:
-    uname = 'unknown'
+    else:
+        uname = 'unknown'
 
-    def printfile(fn):
-        """Report that printing is not supported."""
-        messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
+        def printfile(fn):
+            """Report that printing is not supported."""
+            messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
 
-
-# Create and run the GUI.
-root = ResinCalcUI(None)
-root.wm_title('Resin calculator v' + __version__)
-root.mainloop()
+    # Create and run the GUI.
+    root = ResinCalcUI(None)
+    root.wm_title('Resin calculator v' + __version__)
+    root.mainloop()
