@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2019-08-20T00:59:28+0200
+# Last modified: 2019-08-20T11:12:49+0200
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -19,7 +19,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '2.0'
+__version__ = '1.4'
 
 
 def pround(val):
@@ -49,7 +49,7 @@ def load_data():
     return loads(nocomments), lm
 
 
-def createwindow(root):
+def create_widgets(root):
     keys = sorted(list(recepies.keys()))
     default_font = nametofont("TkDefaultFont")
     default_font.configure(size=12)
@@ -109,6 +109,7 @@ def createwindow(root):
         )
         dflabel.grid(row=4, column=1, columnspan=4, sticky='ew')
     resinchoice.focus_set()
+    # Return the widgets that are referenced by other functions.
     return resinchoice, quantitytype, qedit, result
 
 
@@ -136,7 +137,10 @@ def do_exit(event):
 
 
 def on_resintype(event):
-    """Send update request when resin choice has changed."""
+    """
+    Send update request when resin choice has changed, and both the resin choice
+    and quantity are not empty.
+    """
     val = resinchoice.get()
     text2 = qedit.get()
     if val and text2:
@@ -197,8 +201,10 @@ def do_update(event):
     result.insert("", 'end', values=('total:', pround(q), 'g', ''))
 
 
-def make_text(recipe):
-    """Create text representation of recipe."""
+def make_text(recipe, name):
+    """
+    Create text representation of the current recipe.
+    """
     s = '{:{}s}: {:>{}} {} ({:>{}} /kg)'
     q = sum(float(amnt) for _, amnt, _ in recipe)
     namelen = max(len(nm) for nm, amnt, _ in recipe)
@@ -207,7 +213,7 @@ def make_text(recipe):
     apulen = max(len(apu) for _, _, apu in recipe)
     lines = [
         'Resin calculator v' + __version__, '------------------------', '',
-        'Recipe for: ' + current_name, 'Date: ' + str(datetime.now())[:-7],
+        'Recipe for: ' + name, 'Date: ' + str(datetime.now())[:-7],
         'User: ' + uname, ''
     ]
     lines += [
@@ -225,7 +231,7 @@ def do_print():
     """Send recipe to a file, and print it."""
     if current_recipe is None:
         return
-    text = make_text(current_recipe)
+    text = make_text(current_recipe, current_name)
     filename = 'resin-calculator-output.txt'
     with open(filename, 'w') as pf:
         pf.write(text)
@@ -245,7 +251,7 @@ def do_saveas():
     )
     if not len(fn):
         return
-    text = make_text(current_recipe)
+    text = make_text(current_recipe, current_name)
     with open(fn, 'w') as pf:
         pf.write(text)
 
@@ -293,6 +299,6 @@ if __name__ == '__main__':
     current_name = ''
     # Create and run the GUI.
     root = tk.Tk(None)
-    resinchoice, quantitytype, qedit, result = createwindow(root)
+    resinchoice, quantitytype, qedit, result = create_widgets(root)
     root.wm_title('Resin calculator v' + __version__)
     root.mainloop()
