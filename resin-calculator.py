@@ -5,12 +5,13 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2019-08-20T11:12:49+0200
+# Last modified: 2019-08-31T09:14:39+0200
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
 from json import loads
 from sys import exit as sys_exit
+from types import SimpleNamespace
 import os
 import re
 import tkinter as tk
@@ -19,7 +20,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '1.4'
+__version__ = '1.5'
 
 
 def pround(val):
@@ -50,7 +51,7 @@ def load_data():
 
 
 def create_widgets(root):
-    keys = sorted(list(recepies.keys()))
+    keys = sorted(list(state.recepies.keys()))
     default_font = nametofont("TkDefaultFont")
     default_font.configure(size=12)
     root.option_add("*Font", default_font)
@@ -100,23 +101,26 @@ def create_widgets(root):
     prbut.grid(row=3, column=0, sticky='w')
     savebut = ttk.Button(root, text="Save recipe", command=do_saveas)
     savebut.grid(row=3, column=1, sticky='w')
-    if filedate:
+    if state.filedate:
         dflabel = ttk.Label(
             root,
-            text='Data file modification date: ' + filedate,
+            text='Data file modification date: ' + state.filedate,
             anchor='center',
             foreground='#777777'
         )
         dflabel.grid(row=4, column=1, columnspan=4, sticky='ew')
     resinchoice.focus_set()
     # Return the widgets that are referenced by other functions.
-    return resinchoice, quantitytype, qedit, result
+    w = SimpleNamespace(
+        resinchoice=resinchoice, quantitytype=quantitytype, qedit=qedit, result=result
+    )
+    return w
 
 
 def is_number(data):
     """Validate the contents of an entry widget as a float."""
     if data == '':
-        result.event_generate('<<UpdateNeeded>>', when='tail')
+        w.result.event_generate('<<UpdateNeeded>>', when='tail')
         return True
     try:
         rv = float(data)
@@ -124,7 +128,7 @@ def is_number(data):
             return False
     except ValueError:
         return False
-    result.event_generate('<<UpdateNeeded>>', when='tail')
+    w.result.event_generate('<<UpdateNeeded>>', when='tail')
     return True
 
 
@@ -141,25 +145,25 @@ def on_resintype(event):
     Send update request when resin choice has changed, and both the resin choice
     and quantity are not empty.
     """
-    val = resinchoice.get()
-    text2 = qedit.get()
+    val = w.resinchoice.get()
+    text2 = w.qedit.get()
     if val and text2:
-        result.event_generate('<<UpdateNeeded>>', when='tail')
-    qedit.focus_set()
+        w.result.event_generate('<<UpdateNeeded>>', when='tail')
+    w.qedit.focus_set()
 
 
 def on_quantitytype(event):
     """Send update request when the quantity type has changed."""
-    global qtype
-    val = quantitytype.current()
-    if val != qtype:
-        qtype = val
-        result.event_generate('<<UpdateNeeded>>', when='tail')
+    # global qtype
+    val = w.quantitytype.current()
+    if val != state.qtype:
+        state.qtype = val
+        w.result.event_generate('<<UpdateNeeded>>', when='tail')
 
 
 def get_amount():
     """Return the values of the amount entry field as a float."""
-    value = qedit.get()
+    value = w.qedit.get()
     if not value:
         quantity = 0
     else:
@@ -175,50 +179,50 @@ def do_update(event):
     for the result widget. It updates the contents of that widget based
     on the contents of the entry and combobox widgets.
     """
-    global current_name, current_recipe
-    resin = resinchoice.get()
+    # global current_name, current_recipe
+    resin = w.resinchoice.get()
     if not resin:
         return
     quant = get_amount()
-    current_name = resin
-    components = recepies[resin]
-    if qtype == 0:
+    state.current_name = resin
+    components = state.recepies[resin]
+    if state.qtype == 0:
         factor = quant / sum(c for _, c in components)
     else:
         factor = quant / components[0][1]
-    for item in result.get_children():
-        result.delete(item)
+    for item in w.result.get_children():
+        w.result.delete(item)
     if quant > 0:
-        current_recipe = tuple(
+        state.current_recipe = tuple(
             (name, pround(c * factor), '{:.2f}'.format(int(100000 / (c * factor)) / 100))
             for name, c in components
         )
     else:
-        current_recipe = tuple((name, 0, 0) for name, c in components)
-    for name, amount, ape in current_recipe:
-        result.insert("", 'end', values=(name, amount, 'g', ape))
-    q = sum(float(amnt) for _, amnt, _ in current_recipe)
-    result.insert("", 'end', values=('total:', pround(q), 'g', ''))
+        state.current_recipe = tuple((name, 0, 0) for name, c in components)
+    for name, amount, ape in state.current_recipe:
+        w.result.insert("", 'end', values=(name, amount, 'g', ape))
+    q = sum(float(amnt) for _, amnt, _ in state.current_recipe)
+    w.result.insert("", 'end', values=('total:', pround(q), 'g', ''))
 
 
-def make_text(recipe, name):
+def make_text(state):
     """
     Create text representation of the current recipe.
     """
     s = '{:{}s}: {:>{}} {} ({:>{}} /kg)'
-    q = sum(float(amnt) for _, amnt, _ in recipe)
-    namelen = max(len(nm) for nm, amnt, _ in recipe)
-    amlen = max(len(amnt) for _, amnt, _ in recipe)
+    q = sum(float(amnt) for _, amnt, _ in state.current_recipe)
+    namelen = max(len(nm) for nm, amnt, _ in state.current_recipe)
+    amlen = max(len(amnt) for _, amnt, _ in state.current_recipe)
     amlen = max((amlen, len(pround(q))))
-    apulen = max(len(apu) for _, _, apu in recipe)
+    apulen = max(len(apu) for _, _, apu in state.current_recipe)
     lines = [
         'Resin calculator v' + __version__, '------------------------', '',
-        'Recipe for: ' + name, 'Date: ' + str(datetime.now())[:-7],
-        'User: ' + uname, ''
+        'Recipe for: ' + state.current_name, 'Date: ' + str(datetime.now())[:-7],
+        'User: ' + state.uname, ''
     ]
     lines += [
         s.format(name, namelen, amount, amlen, 'g', apu, apulen)
-        for name, amount, apu in current_recipe
+        for name, amount, apu in state.current_recipe
     ]
     lines += [
         '-' * (namelen + 4 + amlen),
@@ -227,11 +231,11 @@ def make_text(recipe, name):
     return '\n'.join(lines)
 
 
-def do_print():
+def do_print(event):
     """Send recipe to a file, and print it."""
-    if current_recipe is None:
+    if state.current_recipe is None:
         return
-    text = make_text(current_recipe, current_name)
+    text = make_text(state.current_recipe, state.current_name, state)
     filename = 'resin-calculator-output.txt'
     with open(filename, 'w') as pf:
         pf.write(text)
@@ -240,18 +244,18 @@ def do_print():
 
 def do_saveas():
     """Save recipe to a file."""
-    if current_recipe is None:
+    if state.current_recipe is None:
         return
     fn = filedialog.asksaveasfilename(
         parent=root,
         defaultextension='.txt',
         filetypes=(('text files', '*.txt'), ('all files', '*.*')),
-        initialfile=current_name,
+        initialfile=state.current_name,
         initialdir=os.environ['HOME']
     )
     if not len(fn):
         return
-    text = make_text(current_recipe, current_name)
+    text = make_text(state)
     with open(fn, 'w') as pf:
         pf.write(text)
 
@@ -292,13 +296,15 @@ if __name__ == '__main__':
             messagebox.showinfo('Printing', 'Printing is not supported on this OS.')
 
     # Global data
-    recepies, filedate = load_data()
-    qtype = 0
-    quantity = 0
-    current_recipe = None
-    current_name = ''
+    state = SimpleNamespace()
+    state.recepies, state.filedate = load_data()
+    state.qtype = 0
+    state.quantity = 0
+    state.current_recipe = None
+    state.current_name = ''
+    state.uname = uname
     # Create and run the GUI.
     root = tk.Tk(None)
-    resinchoice, quantitytype, qedit, result = create_widgets(root)
+    w = create_widgets(root)
     root.wm_title('Resin calculator v' + __version__)
     root.mainloop()
