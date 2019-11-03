@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2019-08-31T09:14:39+0200
+# Last modified: 2019-11-03T13:45:41+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -20,7 +20,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 
 def pround(val):
@@ -30,7 +30,7 @@ def pround(val):
         precision = 0
     if val < 1:
         precision = 3
-    return '{:.{}f}'.format(val, precision)
+    return f'{val:.{precision}f}'
 
 
 def load_data():
@@ -66,11 +66,15 @@ def create_widgets(root):
     ).grid(
         row=0, column=0, columnspan=2, sticky='we'
     )
-    resinchoice = ttk.Combobox(root, values=keys, state='readonly', justify='right', width=26)
+    resinchoice = ttk.Combobox(
+        root, values=keys, state='readonly', justify='right', width=26
+    )
     resinchoice.grid(row=0, column=2, columnspan=2, sticky='ew')
     resinchoice.bind("<<ComboboxSelected>>", on_resintype)
     qt = ('Total quantity:', 'First component quantity:')
-    quantitytype = ttk.Combobox(root, values=qt, state='readonly', justify='right', width=22)
+    quantitytype = ttk.Combobox(
+        root, values=qt, state='readonly', justify='right', width=22
+    )
     quantitytype.current(0)
     quantitytype.grid(row=1, column=0, columnspan=2, sticky='w')
     quantitytype.bind("<<ComboboxSelected>>", on_quantitytype)
@@ -194,7 +198,7 @@ def do_update(event):
         w.result.delete(item)
     if quant > 0:
         state.current_recipe = tuple(
-            (name, pround(c * factor), '{:.2f}'.format(int(100000 / (c * factor)) / 100))
+            (name, pround(c * factor), f'{int(100000/(c*factor))/100:.2f}')
             for name, c in components
         )
     else:
@@ -209,24 +213,27 @@ def make_text(state):
     """
     Create text representation of the current recipe.
     """
-    s = '{:{}s}: {:>{}} {} ({:>{}} /kg)'
     q = sum(float(amnt) for _, amnt, _ in state.current_recipe)
     namelen = max(len(nm) for nm, amnt, _ in state.current_recipe)
     amlen = max(len(amnt) for _, amnt, _ in state.current_recipe)
     amlen = max((amlen, len(pround(q))))
     apulen = max(len(apu) for _, _, apu in state.current_recipe)
     lines = [
-        'Resin calculator v' + __version__, '------------------------', '',
-        'Recipe for: ' + state.current_name, 'Date: ' + str(datetime.now())[:-7],
-        'User: ' + state.uname, ''
+        f'Resin calculator v{__version__}',
+        '------------------------',
+        '',
+        f'Recipe for: {state.current_name}',
+        f'Date: {str(datetime.now())[:-7]}',
+        'User: {state.uname}',
+        ''
     ]
     lines += [
-        s.format(name, namelen, amount, amlen, 'g', apu, apulen)
+        f'{name:{namelen}s}: {amount:>{amlen}} g ({apu:>{apulen}} /kg)'
         for name, amount, apu in state.current_recipe
     ]
     lines += [
         '-' * (namelen + 4 + amlen),
-        '{:{}s}{:>{}} {}'.format('', namelen + 2, pround(q), amlen, 'g')
+        f'{"":{namelen + 2}s}{pround(q):>{amlen}} g'
     ]
     return '\n'.join(lines)
 
@@ -270,9 +277,9 @@ if __name__ == '__main__':
         def printfile(fn):
             """Print the given file using the default printer."""
             dp = GetDefaultPrinter()
-            rv = ShellExecute(0, 'print', fn, '/d: "{}"'.format(dp), '.', 0)
+            rv = ShellExecute(0, 'print', fn, f'/d: "{dp}"', '.', 0)
             if 0 < rv <= 32:
-                messagebox.showerror('Printing failed', 'Error code: {}'.format(rv))
+                messagebox.showerror('Printing failed', f'Error code: {rv}')
 
     elif os.name == 'posix':
         from subprocess import run
@@ -282,7 +289,7 @@ if __name__ == '__main__':
             """Print the given file using “lpr”."""
             cp = run(['lpr', fn])
             if cp.returncode != 0:
-                messagebox.showerror('Printing failed', 'Error code: {}'.format(cp.returncode))
+                messagebox.showerror('Printing failed', f'Error code: {cp.returncode}')
 
         # Detach from terminal.
         if os.fork():
