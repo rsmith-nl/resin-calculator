@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2019-11-03T13:45:41+0100
+# Last modified: 2019-11-18T14:43:07+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -38,7 +38,7 @@ def load_data():
     try:
         with open(os.environ['HOME'] + os.sep + 'resins.json') as rf:
             lines = rf.readlines()
-    except FileNotFoundError:
+    except (FileNotFoundError, KeyError):
         with open('resins.json') as rf:
             lines = rf.readlines()
     text = '\n'.join([ln.strip() for ln in lines])
