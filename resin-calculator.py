@@ -20,7 +20,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = '1.6'
+__version__ = "2019.11.18"
 
 
 def pround(val):
