@@ -5,7 +5,7 @@ Resin calculator
 :tags: python, composites, bonding
 :author: Roland Smith
 
-.. Last modified: 2017-12-21 17:14:54 +0100
+.. Last modified: 2020-10-25T15:43:45+0100
 
 Introduction
 ------------
@@ -24,9 +24,16 @@ Requirements
 
 The following software is required:
 
-* Python 3
-* Tkinter
+* Python 3.6 or later
+* Tkinter (can be included with Python)
 * ttk (might be included in Tkinter)
+
+
+Installation
+------------
+
+Run ``setup.py install`` to do an install for the current user.
+
 
 Data-file
 ---------
