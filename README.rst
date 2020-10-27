@@ -5,7 +5,7 @@ Resin calculator
 :tags: python, composites, bonding
 :author: Roland Smith
 
-.. Last modified: 2020-10-25T15:43:45+0100
+.. Last modified: 2020-10-27T18:38:25+0100
 
 Introduction
 ------------
@@ -32,7 +32,15 @@ The following software is required:
 Installation
 ------------
 
-Run ``setup.py install`` to do an install for the current user.
+To install it for the local user, run::
+
+    python setup.py install
+
+This will install it in the user path for Python scripts.
+For POSIX operating systems this is ususally ``~/.local/bin``.
+For ms-windows this is the ``Scripts`` directory of your Python installation
+or another local directory.
+Make sure that this directory is in your ``$PATH`` environment variable.
 
 
 Data-file
