@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2019-11-18T14:43:07+0100
+# Last modified: 2020-11-29T23:29:25+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -20,7 +20,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = "2019.11.18"
+__version__ = "2020.11.29"
 
 
 def pround(val):
@@ -36,7 +36,7 @@ def pround(val):
 def load_data():
     """Load the resin data."""
     try:
-        with open(os.environ["HOME"] + os.sep + "resins.json") as rf:
+        with open(_home + os.sep + "resins.json") as rf:
             lines = rf.readlines()
     except (FileNotFoundError, KeyError):
         with open("resins.json") as rf:
@@ -224,7 +224,7 @@ def make_text(state):
         "",
         f"Recipe for: {state.current_name}",
         f"Date: {str(datetime.now())[:-7]}",
-        "User: {state.uname}",
+        "User: {_uname}",
         "",
     ]
     lines += [
@@ -243,7 +243,7 @@ def do_print(event):
     filename = "resin-calculator-output.txt"
     with open(filename, "w") as pf:
         pf.write(text)
-    printfile(filename)
+    _printfile(filename)
 
 
 def do_saveas():
@@ -255,7 +255,7 @@ def do_saveas():
         defaultextension=".txt",
         filetypes=(("text files", "*.txt"), ("all files", "*.*")),
         initialfile=state.current_name,
-        initialdir=os.environ["HOME"],
+        initialdir=_home,
     )
     if not len(fn):
         return
@@ -270,9 +270,10 @@ if __name__ == "__main__":
         from win32api import ShellExecute
         from win32print import GetDefaultPrinter
 
-        uname = os.environ["USERNAME"]
+        _uname = os.environ["USERNAME"]
+        _home = os.environ["HOMEPATH"]
 
-        def printfile(fn):
+        def _printfile(fn):
             """Print the given file using the default printer."""
             dp = GetDefaultPrinter()
             rv = ShellExecute(0, "print", fn, f'/d: "{dp}"', ".", 0)
@@ -282,9 +283,10 @@ if __name__ == "__main__":
     elif os.name == "posix":
         from subprocess import run
 
-        uname = os.environ["USER"]
+        _uname = os.environ["USER"]
+        _home = os.environ["HOME"]
 
-        def printfile(fn):
+        def _printfile(fn):
             """Print the given file using “lpr”."""
             cp = run(["lpr", fn])
             if cp.returncode != 0:
@@ -295,9 +297,10 @@ if __name__ == "__main__":
             sys_exit()
 
     else:
-        uname = "unknown"
+        _uname = "unknown"
+        _home = "unknown"
 
-        def printfile(fn):
+        def _printfile(fn):
             """Report that printing is not supported."""
             messagebox.showinfo("Printing", "Printing is not supported on this OS.")
 
@@ -308,7 +311,6 @@ if __name__ == "__main__":
     state.quantity = 0
     state.current_recipe = None
     state.current_name = ""
-    state.uname = uname
     # Create and run the GUI.
     root = tk.Tk(None)
     w = create_widgets(root)
