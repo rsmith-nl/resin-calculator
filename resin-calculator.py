@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2020-11-29T23:29:25+0100
+# Last modified: 2020-12-02T23:26:28+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -20,7 +20,7 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = "2020.11.29"
+__version__ = "2020.12.02"
 
 
 def pround(val):
@@ -55,8 +55,6 @@ def create_widgets(root):
     default_font = nametofont("TkDefaultFont")
     default_font.configure(size=12)
     root.option_add("*Font", default_font)
-    # General commands and bindings
-    root.bind_all("q", do_exit)
     # Make selected rows and columns resizable
     root.columnconfigure(2, weight=1)
     root.rowconfigure(2, weight=1)
