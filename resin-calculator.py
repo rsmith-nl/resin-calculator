@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2020-12-02T23:26:28+0100
+# Last modified: 2020-12-08T15:02:06+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -222,7 +222,7 @@ def make_text(state):
         "",
         f"Recipe for: {state.current_name}",
         f"Date: {str(datetime.now())[:-7]}",
-        "User: {_uname}",
+        f"User: {_uname}",
         "",
     ]
     lines += [
@@ -239,7 +239,7 @@ def do_print(event):
         return
     text = make_text(state.current_recipe, state.current_name, state)
     filename = "resin-calculator-output.txt"
-    with open(filename, "w") as pf:
+    with open(_home + os.sep + filename, "w") as pf:
         pf.write(text)
     _printfile(filename)
 
@@ -269,12 +269,14 @@ if __name__ == "__main__":
         from win32print import GetDefaultPrinter
 
         _uname = os.environ["USERNAME"]
-        _home = os.environ["HOMEPATH"]
+        _home = os.environ["HOMEDRIVE"] + os.environ["HOMEPATH"]
+        if _home.endswith(os.sep):
+            _home = _home[:-1]
 
         def _printfile(fn):
             """Print the given file using the default printer."""
             dp = GetDefaultPrinter()
-            rv = ShellExecute(0, "print", fn, f'/d: "{dp}"', ".", 0)
+            rv = ShellExecute(0, "print", fn, f'/D: "{dp}"', _home, 0)
             if 0 < rv <= 32:
                 messagebox.showerror("Printing failed", f"Error code: {rv}")
 
