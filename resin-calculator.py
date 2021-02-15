@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # file: resin-calculator.py
 # vim:fileencoding=utf-8:fdm=marker:ft=python
 #
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2020-12-08T15:02:06+0100
+# Last modified: 2021-02-15T21:23:33+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
