@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2021-02-15T21:23:33+0100
+# Last modified: 2022-01-23T12:05:14+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -20,7 +20,12 @@ from tkinter.font import nametofont
 from tkinter import messagebox
 from tkinter import filedialog
 
-__version__ = "2020.12.02"
+__version__ = "2022.01.23"
+home = ""
+uname = ""
+NORMAL_SIZE = 12
+LARGE_SIZE = 14
+FONT_SCALE = 2.3
 
 
 def pround(val):
@@ -36,7 +41,7 @@ def pround(val):
 def load_data():
     """Load the resin data."""
     try:
-        with open(_home + os.sep + "resins.json") as rf:
+        with open(home + os.sep + "resins.json") as rf:
             lines = rf.readlines()
     except (FileNotFoundError, KeyError):
         with open("resins.json") as rf:
@@ -53,7 +58,7 @@ def load_data():
 def create_widgets(root):
     keys = sorted(list(state.recepies.keys()))
     default_font = nametofont("TkDefaultFont")
-    default_font.configure(size=12)
+    default_font.configure(size=NORMAL_SIZE)
     root.option_add("*Font", default_font)
     # Make selected rows and columns resizable
     root.columnconfigure(2, weight=1)
@@ -87,7 +92,12 @@ def create_widgets(root):
         selectmode="none",
     )
     style = ttk.Style(root)
-    style.configure("Treeview", rowheight=24)
+    style.configure("Treeview", rowheight=int(NORMAL_SIZE * FONT_SCALE))
+    style.configure(
+        "Treeview.Heading",
+        rowheight=int(LARGE_SIZE * FONT_SCALE),
+        font=(None, LARGE_SIZE),
+    )
     result.heading("component", text="Component", anchor="w")
     result.heading("quantity", text="Quantity", anchor="e")
     result.heading("unit", text="Unit", anchor="w")
@@ -222,7 +232,7 @@ def make_text(state):
         "",
         f"Recipe for: {state.current_name}",
         f"Date: {str(datetime.now())[:-7]}",
-        f"User: {_uname}",
+        f"User: {uname}",
         "",
     ]
     lines += [
@@ -239,7 +249,7 @@ def do_print(event):
         return
     text = make_text(state.current_recipe, state.current_name, state)
     filename = "resin-calculator-output.txt"
-    with open(_home + os.sep + filename, "w") as pf:
+    with open(home + os.sep + filename, "w") as pf:
         pf.write(text)
     _printfile(filename)
 
@@ -253,7 +263,7 @@ def do_saveas():
         defaultextension=".txt",
         filetypes=(("text files", "*.txt"), ("all files", "*.*")),
         initialfile=state.current_name,
-        initialdir=_home,
+        initialdir=home,
     )
     if not len(fn):
         return
@@ -268,23 +278,23 @@ if __name__ == "__main__":
         from win32api import ShellExecute
         from win32print import GetDefaultPrinter
 
-        _uname = os.environ["USERNAME"]
-        _home = os.environ["HOMEDRIVE"] + os.environ["HOMEPATH"]
-        if _home.endswith(os.sep):
-            _home = _home[:-1]
+        uname = os.environ["USERNAME"]
+        home = os.environ["HOMEDRIVE"] + os.environ["HOMEPATH"]
+        if home.endswith(os.sep):
+            home = home[:-1]
 
         def _printfile(fn):
             """Print the given file using the default printer."""
             dp = GetDefaultPrinter()
-            rv = ShellExecute(0, "print", fn, f'/D: "{dp}"', _home, 0)
+            rv = ShellExecute(0, "print", fn, f'/D: "{dp}"', home, 0)
             if 0 < rv <= 32:
                 messagebox.showerror("Printing failed", f"Error code: {rv}")
 
     elif os.name == "posix":
         from subprocess import run
 
-        _uname = os.environ["USER"]
-        _home = os.environ["HOME"]
+        uname = os.environ["USER"]
+        home = os.environ["HOME"]
 
         def _printfile(fn):
             """Print the given file using “lpr”."""
@@ -297,8 +307,8 @@ if __name__ == "__main__":
             sys_exit()
 
     else:
-        _uname = "unknown"
-        _home = "unknown"
+        uname = "unknown"
+        home = "unknown"
 
         def _printfile(fn):
             """Report that printing is not supported."""
