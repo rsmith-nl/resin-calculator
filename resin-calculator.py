@@ -5,7 +5,7 @@
 # Copyright © 2017-2018 R.F. Smith <rsmith@xs4all.nl>.
 # SPDX-License-Identifier: MIT
 # Created: 2017-04-28T15:04:26+0200
-# Last modified: 2022-01-23T12:05:14+0100
+# Last modified: 2022-02-04T23:48:22+0100
 """GUI for calculating resin amounts."""
 
 from datetime import datetime
@@ -276,7 +276,6 @@ if __name__ == "__main__":
     # Platform specific set-up
     if os.name == "nt":
         from win32api import ShellExecute
-        from win32print import GetDefaultPrinter
 
         uname = os.environ["USERNAME"]
         home = os.environ["HOMEDRIVE"] + os.environ["HOMEPATH"]
@@ -285,8 +284,7 @@ if __name__ == "__main__":
 
         def _printfile(fn):
             """Print the given file using the default printer."""
-            dp = GetDefaultPrinter()
-            rv = ShellExecute(0, "print", fn, f'/D: "{dp}"', home, 0)
+            rv = ShellExecute(0, "print", fn, None, home, 0)
             if 0 < rv <= 32:
                 messagebox.showerror("Printing failed", f"Error code: {rv}")
 
